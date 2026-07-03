@@ -52,13 +52,7 @@ export default function Home() {
     if (file.type === "text/plain" || file.name.endsWith(".txt")) {
       const text = await file.text();
       setApunte(text);
-      return;
     }
-
-    setApunte("");
-    setError(
-      "Archivo seleccionado. En esta versión ya puedes seleccionar PDF/Word, pero la extracción automática se conectará en el siguiente paso. Por ahora pega el texto manualmente abajo."
-    );
   }
 
   async function generar() {
@@ -70,16 +64,22 @@ export default function Home() {
     setShow(false);
 
     try {
-      if (apunte.trim().length < 200) {
-        throw new Error(
-          "Para generar recursos ahora, pega al menos 200 caracteres del apunte. La lectura automática de PDF/Word será el siguiente módulo."
-        );
+      if (!archivo && apunte.trim().length < 200) {
+        throw new Error("Sube un PDF/Word/TXT o pega al menos 200 caracteres.");
+      }
+
+      const formData = new FormData();
+      formData.append("materia", materia);
+      formData.append("titulo", titulo);
+      formData.append("apunte", apunte);
+
+      if (archivo) {
+        formData.append("archivo", archivo);
       }
 
       const res = await fetch("/api/generar", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ materia, titulo, apunte }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -92,7 +92,7 @@ export default function Home() {
         {
           id: Date.now(),
           materia,
-          titulo: titulo || "Documento sin título",
+          titulo: titulo || archivo?.name || "Documento sin título",
           fecha: new Date().toLocaleString(),
           archivo: archivo?.name || null,
           recursos: lista,
@@ -197,7 +197,7 @@ export default function Home() {
             <textarea
               value={apunte}
               onChange={(e) => setApunte(e.target.value)}
-              placeholder="Pega aquí el contenido del documento..."
+              placeholder="Pega aquí el contenido del documento si no quieres subir archivo..."
             />
           </details>
 
@@ -211,11 +211,6 @@ export default function Home() {
               Limpiar
             </button>
           </div>
-
-          <p className="hint">
-            Siguiente paso: conectar lectura automática de PDF/Word y guardar
-            documentos reales en biblioteca.
-          </p>
         </div>
 
         <div className="card">
