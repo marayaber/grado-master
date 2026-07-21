@@ -154,7 +154,7 @@ function eliminarGuardado(id) {
     <main className="wrap">
       <section className="hero">
         <div>
-          <p className="eyebrow">MVP funcional</p>
+          <p className="eyebrow">tu compañero de estudio</p>
           <h1>Grado Master</h1>
           <p className="sub">
             Sube tus documentos de estudio y transforma tus apuntes en recursos
