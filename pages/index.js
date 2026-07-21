@@ -134,7 +134,11 @@ export default function Home() {
     setShow(false);
     window.scrollTo(0, 0);
   }
+function eliminarGuardado(id) {
+  if (!window.confirm("¿Eliminar este documento de la biblioteca?")) return;
 
+  setSaved((prev) => prev.filter((item) => item.id !== id));
+}
   function limpiar() {
     setTitulo("");
     setApunte("");
@@ -240,7 +244,27 @@ export default function Home() {
     </button>
   </div>
 ))}
-          ))}
+{saved.map((item) => (
+  <div key={item.id} className="saved">
+    <div
+      style={{ cursor: "pointer" }}
+      onClick={() => cargarGuardado(item)}
+    >
+      <b>{item.titulo}</b>
+      <span>
+        {item.materia} · {item.recursos.length} preguntas
+      </span>
+    </div>
+
+    <button
+      className="secondary"
+      style={{ marginTop: "10px" }}
+      onClick={() => eliminarGuardado(item.id)}
+    >
+      🗑 Eliminar
+    </button>
+  </div>
+        
         </div>
       </section>
 
