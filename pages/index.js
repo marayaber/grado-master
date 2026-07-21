@@ -219,17 +219,27 @@ export default function Home() {
             <p className="muted">Todavía no hay documentos guardados.</p>
           )}
 
-          {saved.map((item) => (
-            <button
-              className="saved"
-              key={item.id}
-              onClick={() => cargarGuardado(item)}
-            >
-              <b>{item.titulo}</b>
-              <span>
-                {item.materia} · {item.recursos.length} preguntas
-              </span>
-            </button>
+         {saved.map((item) => (
+  <div key={item.id} className="saved">
+    <div
+      style={{ cursor: "pointer" }}
+      onClick={() => cargarGuardado(item)}
+    >
+      <b>{item.titulo}</b>
+      <span>
+        {item.materia} · {item.recursos.length} preguntas
+      </span>
+    </div>
+
+    <button
+      className="secondary"
+      style={{ marginTop: "10px" }}
+      onClick={() => eliminarGuardado(item.id)}
+    >
+      🗑 Eliminar
+    </button>
+  </div>
+))}
           ))}
         </div>
       </section>
