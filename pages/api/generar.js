@@ -48,22 +48,35 @@ export default async function handler(req, res) {
       },
     });
 
-   const result = await model.generateContent(prompt);
+    const prompt = `
+Eres un preparador de Derecho en Chile.
 
-const data = JSON.parse(result.response.text());
+Genera 15 preguntas de alternativa con 4 opciones basadas EXCLUSIVAMENTE en el apunte.
 
-const quiz = (data.quiz || []).filter(
-  (r) => r.pregunta && r.opciones && r.respuesta_correcta
-);
+Reglas:
+- No inventes información externa.
+- No inventes artículos.
+- La cita_textual debe salir literalmente del apunte.
+- Responde solo JSON válido.
 
-if (!quiz.length) {
-  throw new Error("Gemini no devolvió preguntas válidas.");
+Formato:
+{
+  "recursos": [
+    {
+      "pregunta": "",
+      "opciones": {"a":"","b":"","c":"","d":""},
+      "respuesta_correcta": "a",
+      "explicacion": "",
+      "cita_textual": ""
+    }
+  ]
 }
 
-return res.status(200).json({
-  flashcards: data.flashcards || [],
-  quiz,
-});
+Materia: ${materia}
+Título: ${titulo}
+Apunte:
+${apunte.slice(0, 30000)}
+`;
 
     const result = await model.generateContent(prompt);
     const data = JSON.parse(result.response.text());
