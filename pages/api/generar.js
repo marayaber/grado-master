@@ -47,113 +47,77 @@ export default async function handler(req, res) {
         temperature: 0.1,
       },
     });
+const prompt = `
+Eres un preparador experto.
 
-    const prompt = `
-Eres un preparador de Derecho en Chile.
+Analiza EXCLUSIVAMENTE el documento proporcionado.
 
-Genera 15 preguntas de alternativa con 4 opciones basadas EXCLUSIVAMENTE en el apunte.
+Debes generar:
+
+1. Flashcards de estudio.
+2. Un quiz de alternativa.
+
+Las flashcards deben cubrir TODO el documento.
+
+Cantidad de flashcards:
+
+- Documento hasta 50 páginas → 20 flashcards.
+- 51 a 100 páginas → 40 flashcards.
+- 101 a 150 páginas → 60 flashcards.
+- 151 a 200 páginas → 80 flashcards.
+- Más de 200 páginas → genera la cantidad necesaria para cubrir completamente el contenido.
+
+Cada flashcard debe tener este formato:
+
+{
+  "frente":"",
+  "reverso":"",
+  "cita_textual":""
+}
+
+Luego genera un quiz de 15 preguntas.
 
 Reglas:
-- No inventes información externa.
-- No inventes artículos.
-- La cita_textual debe salir literalmente del apunte.
-- Responde solo JSON válido.
+
+- No inventar información.
+- No usar conocimiento externo.
+- La explicación debe basarse únicamente en el documento.
+- La cita_textual debe existir literalmente en el documento.
+- Devuelve únicamente JSON válido.
 
 Formato:
+
 {
-  "recursos": [
+  "flashcards":[
     {
-      "pregunta": "",
-      "opciones": {"a":"","b":"","c":"","d":""},
-      "respuesta_correcta": "a",
-      "explicacion": "",
-      "cita_textual": ""
+      "frente":"",
+      "reverso":"",
+      "cita_textual":""
+    }
+  ],
+  "quiz":[
+    {
+      "pregunta":"",
+      "opciones":{
+        "a":"",
+        "b":"",
+        "c":"",
+        "d":""
+      },
+      "respuesta_correcta":"a",
+      "explicacion":"",
+      "cita_textual":""
     }
   ]
 }
 
-Materia: ${materia}
-Título: ${titulo}
-Apunte:
-${apunte.slice(0, 30000)}
+Materia:
+${materia}
+
+Título:
+${titulo}
+
+Documento:
+
+${apunte.slice(0,30000)}
 `;
-
-    const result = await model.generateContent(prompt);
-    const data = JSON.parse(result.response.text());
-
-    const recursos = (data.recursos || []).filter(
-      (r) => r.pregunta && r.opciones && r.respuesta_correcta
-    );
-
-    if (!recursos.length) {
-      throw new Error("Gemini no devolvió preguntas válidas.");
-    }
-
-    return res.status(200).json({ recursos });
-  } catch (e) {
-    return res.status(500).json({
-      error: e.message || "Error generando recursos",
-    });
-  }
-}
-
-function parseForm(req) {
-  const form = formidable({
-    multiples: false,
-    keepExtensions: true,
-  });
-
-  return new Promise((resolve, reject) => {
-    form.parse(req, (err, fields, files) => {
-      if (err) reject(err);
-      else resolve({ fields, files });
-    });
-  });
-}
-
-async function extraerTexto(file) {
-  const buffer = await fs.readFile(file.filepath);
-  const name = file.originalFilename?.toLowerCase() || "";
-  const type = file.mimetype || "";
-
-  if (type === "application/pdf" || name.endsWith(".pdf")) {
-    const data = await pdf(buffer);
-    return data.text;
-  }
-
-  if (
-    type ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    name.endsWith(".docx")
-  ) {
-    const data = await mammoth.extractRawText({ buffer });
-    return data.value;
-  }
-
-  if (type === "text/plain" || name.endsWith(".txt")) {
-    return buffer.toString("utf-8");
-  }
-
-  throw new Error("Formato no soportado. Usa PDF, DOCX o TXT.");
-}
-
-function demo(apunte) {
-  const clean = apunte.replace(/\s+/g, " ").trim();
-  const frases = clean.match(/[^.!?]+[.!?]+/g)?.slice(0, 8) || [
-    clean.slice(0, 250),
-  ];
-
-  return frases.slice(0, 5).map((f, i) => ({
-    pregunta: `Según el apunte, ¿cuál es la idea central del fragmento ${i + 1}?`,
-    opciones: {
-      a: f.slice(0, 120),
-      b: "Una afirmación no contenida en el apunte",
-      c: "Una regla inventada por la aplicación",
-      d: "Un concepto ajeno al texto",
-    },
-    respuesta_correcta: "a",
-    explicacion:
-      "La alternativa correcta reproduce una idea contenida directamente en el apunte.",
-    cita_textual: f.trim(),
-  }));
-}
