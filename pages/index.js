@@ -19,6 +19,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [recursos, setRecursos] = useState([]);
+  const [flashcards, setFlashcards] = useState([]);
   const [i, setI] = useState(0);
   const [sel, setSel] = useState("");
   const [show, setShow] = useState(false);
