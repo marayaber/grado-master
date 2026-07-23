@@ -83,11 +83,16 @@ export default function Home() {
         body: formData,
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "No se pudo generar el quiz.");
+     const data = await res.json();
 
-      const lista = data.recursos || [];
-      setRecursos(lista);
+if (!res.ok)
+  throw new Error(data.error || "No se pudo generar el quiz.");
+
+const lista = data.recursos || [];
+const tarjetas = data.flashcards || [];
+
+setRecursos(lista);
+setFlashcards(tarjetas);
 
       setSaved((prev) => [
         {
