@@ -48,36 +48,83 @@ export default async function handler(req, res) {
       },
     });
 
-    const prompt = `
-Eres un preparador de Derecho en Chile.
+   const prompt = `
+Eres un preparador experto.
 
-Genera 15 preguntas de alternativa con 4 opciones basadas EXCLUSIVAMENTE en el apunte.
+Trabaja EXCLUSIVAMENTE con el documento proporcionado.
 
-Reglas:
-- No inventes información externa.
-- No inventes artículos.
-- La cita_textual debe salir literalmente del apunte.
-- Responde solo JSON válido.
+No inventes información.
+No uses conocimiento externo.
+No inventes artículos.
+No inventes conceptos.
+
+Primero genera flashcards.
+
+La cantidad debe depender del tamaño del documento:
+
+- Hasta 50 páginas: 20 flashcards.
+- 51 a 100 páginas: 40 flashcards.
+- 101 a 150 páginas: 60 flashcards.
+- 151 a 200 páginas: 80 flashcards.
+- Más de 200 páginas: genera las necesarias para cubrir completamente el contenido.
+
+Las flashcards deben cubrir todo el documento y mezclar:
+
+- Definiciones.
+- Requisitos.
+- Clasificaciones.
+- Diferencias.
+- Enumeraciones.
+- Excepciones.
+- Conceptos importantes.
+
+Después genera un quiz de 15 preguntas de alternativa.
+
+Cada pregunta debe tener:
+
+- 4 alternativas.
+- Una sola correcta.
+- Explicación del porqué.
+- Cita textual del documento.
+
+Devuelve únicamente JSON válido.
 
 Formato:
+
 {
-  "recursos": [
+  "flashcards":[
     {
-      "pregunta": "",
-      "opciones": {"a":"","b":"","c":"","d":""},
-      "respuesta_correcta": "a",
-      "explicacion": "",
-      "cita_textual": ""
+      "frente":"",
+      "reverso":"",
+      "cita_textual":""
+    }
+  ],
+  "recursos":[
+    {
+      "pregunta":"",
+      "opciones":{
+        "a":"",
+        "b":"",
+        "c":"",
+        "d":""
+      },
+      "respuesta_correcta":"a",
+      "explicacion":"",
+      "cita_textual":""
     }
   ]
 }
 
-Materia: ${materia}
-Título: ${titulo}
-Apunte:
-${apunte.slice(0, 30000)}
-`;
+Materia:
+${materia}
 
+Título:
+${titulo}
+
+Documento:
+
+${apunte.slice(0,30000)}
+`;
     const result = await model.generateContent(prompt);
     const data = JSON.parse(result.response.text());
 
