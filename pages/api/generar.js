@@ -128,15 +128,20 @@ ${apunte.slice(0,30000)}
     const result = await model.generateContent(prompt);
     const data = JSON.parse(result.response.text());
 
-    const recursos = (data.recursos || []).filter(
-      (r) => r.pregunta && r.opciones && r.respuesta_correcta
-    );
+    const flashcards = data.flashcards || [];
 
-    if (!recursos.length) {
-      throw new Error("Gemini no devolvió preguntas válidas.");
-    }
+const recursos = (data.recursos || []).filter(
+  (r) => r.pregunta && r.opciones && r.respuesta_correcta
+);
 
-    return res.status(200).json({ recursos });
+if (!flashcards.length && !recursos.length) {
+  throw new Error("Gemini no devolvió contenido válido.");
+}
+
+return res.status(200).json({
+  flashcards,
+  recursos,
+});
   } catch (e) {
     return res.status(500).json({
       error: e.message || "Error generando recursos",
