@@ -20,6 +20,8 @@ export default function Home() {
   const [error, setError] = useState("");
   const [recursos, setRecursos] = useState([]);
   const [flashcards, setFlashcards] = useState([]);
+  const [flashIndex, setFlashIndex] = useState(0);
+const [mostrarReverso, setMostrarReverso] = useState(false);
   const [i, setI] = useState(0);
   const [sel, setSel] = useState("");
   const [show, setShow] = useState(false);
