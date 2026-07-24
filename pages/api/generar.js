@@ -127,7 +127,7 @@ ${apunte.slice(0,30000)}
 `;
     const result = await model.generateContent(prompt);
     const data = JSON.parse(result.response.text());
-
+console.log(JSON.stringify(data.flashcards?.[0], null, 2));
     const flashcards = data.flashcards || [];
 
 const recursos = (data.recursos || []).filter(
