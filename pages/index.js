@@ -26,6 +26,7 @@ const [mostrarReverso, setMostrarReverso] = useState(false);
   const [sel, setSel] = useState("");
   const [show, setShow] = useState(false);
   const [saved, setSaved] = useState([]);
+  const [vista, setVista] = useState("flashcards");
 
   useEffect(() => {
     setSaved(JSON.parse(localStorage.getItem("gradoMasterRecursos") || "[]"));
@@ -91,11 +92,13 @@ if (!res.ok)
   throw new Error(data.error || "No se pudo generar el quiz.");
 
 const lista = data.recursos || [];
-const tarjetas = data.flashcards || [];
+const cards = data.flashcards || [];
 
 setRecursos(lista);
-setFlashcards(tarjetas);
+setFlashcards(cards);
 
+setFlashIndex(0);
+setMostrarReverso(false);
       setSaved((prev) => [
         {
           id: Date.now(),
@@ -106,6 +109,7 @@ setFlashcards(tarjetas);
           recursos: lista,
         },
         ...prev,
+        
       ]);
     } catch (e) {
       setError(e.message);
@@ -160,6 +164,19 @@ function eliminarGuardado(id) {
 
   return (
     <main className="wrap">
+    <div className="tabs">
+  <button onClick={() => setVista("flashcards")}>
+    📚 Flashcards
+  </button>
+
+  <button onClick={() => setVista("quiz")}>
+    📝 Quiz
+  </button>
+
+  <button onClick={() => setVista("profesor")}>
+    👨‍🏫 Profesor Exigente
+  </button>
+</div>
       <section className="hero">
         <div>
           <p className="eyebrow">tu compañero de estudio</p>
@@ -254,8 +271,61 @@ function eliminarGuardado(id) {
 ))}
         </div>
       </section>
+{vista === "flashcards" && flashcards.length > 0 && (
+  <section className="card">
 
-      {recursos.length > 0 && (
+    <h2>Flashcard {flashIndex + 1} de {flashcards.length}</h2>
+
+    <div
+      className="flashcard"
+      onClick={() => setMostrarReverso(!mostrarReverso)}
+    >
+      {!mostrarReverso ? (
+        <>
+          <h3>Frente</h3>
+          <p>{flashcards[flashIndex].frente}</p>
+        </>
+      ) : (
+        <>
+          <h3>Reverso</h3>
+          <p>{flashcards[flashIndex].reverso}</p>
+
+          {flashcards[flashIndex].cita_textual && (
+            <blockquote>
+              {flashcards[flashIndex].cita_textual}
+            </blockquote>
+          )}
+        </>
+      )}
+    </div>
+
+    <div className="actions">
+      <button
+        className="secondary"
+        disabled={flashIndex === 0}
+        onClick={() => {
+          setFlashIndex(flashIndex - 1);
+          setMostrarReverso(false);
+        }}
+      >
+        ← Anterior
+      </button>
+
+      <button
+        className="secondary"
+        disabled={flashIndex === flashcards.length - 1}
+        onClick={() => {
+          setFlashIndex(flashIndex + 1);
+          setMostrarReverso(false);
+        }}
+      >
+        Siguiente →
+      </button>
+    </div>
+
+  </section>
+)}
+      {vista === "quiz" && recursos.length > 0 && (
         <section className="card quiz">
           {i < recursos.length ? (
             <>
