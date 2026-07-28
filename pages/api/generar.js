@@ -47,7 +47,7 @@ export default async function handler(req, res) {
         temperature: 0.1,
       },
     });
-const cantidadFlashcards = Math.max(20, Math.floor(apunte.length / 250));
+const cantidadFlashcards = 40;
    const prompt = `
 Eres un preparador experto.
 
