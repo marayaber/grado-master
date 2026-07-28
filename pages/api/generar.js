@@ -47,7 +47,7 @@ export default async function handler(req, res) {
         temperature: 0.1,
       },
     });
-
+const cantidadFlashcards = Math.max(20, Math.floor(apunte.length / 250));
    const prompt = `
 Eres un preparador experto.
 
@@ -59,25 +59,32 @@ No inventes artículos.
 No inventes conceptos.
 
 Primero genera flashcards.
+Genera EXACTAMENTE ${cantidadFlashcards} flashcards.
 
-La cantidad debe depender del tamaño del documento:
+No generes menos.
+No generes más.
 
-- Hasta 50 páginas: 20 flashcards.
-- 51 a 100 páginas: 40 flashcards.
-- 101 a 150 páginas: 60 flashcards.
-- 151 a 200 páginas: 80 flashcards.
-- Más de 200 páginas: genera las necesarias para cubrir completamente el contenido.
+Las flashcards deben cubrir TODO el contenido del documento.
 
-Las flashcards deben cubrir todo el documento y mezclar:
+Cada concepto importante debe transformarse en una o más flashcards.
+
+Prefiero demasiadas flashcards antes que pocas.
+
+Incluye:
 
 - Definiciones.
-- Requisitos.
+- Conceptos.
 - Clasificaciones.
+- Requisitos.
 - Diferencias.
 - Enumeraciones.
 - Excepciones.
-- Conceptos importantes.
+- Efectos jurídicos.
+- Principios.
+- Artículos mencionados.
+- Ejemplos del documento.
 
+No dejes contenido importante sin convertir en flashcards.
 Después genera un quiz de 15 preguntas de alternativa.
 
 Cada pregunta debe tener:
@@ -123,7 +130,7 @@ ${titulo}
 
 Documento:
 
-${apunte.slice(0,30000)}
+${apunte.slice(0,80000)}
 `;
     const result = await model.generateContent(prompt);
     const data = JSON.parse(result.response.text());
