@@ -107,6 +107,7 @@ setMostrarReverso(false);
           fecha: new Date().toLocaleString(),
           archivo: archivo?.name || null,
           recursos: lista,
+          flashcards: cards,
         },
         ...prev,
         
@@ -141,6 +142,7 @@ setMostrarReverso(false);
     setMateria(item.materia);
     setTitulo(item.titulo);
     setRecursos(item.recursos);
+    setFlashcards(Array.isArray(item.flashcards) ? item.flashcards : []);
     setI(0);
     setSel("");
     setShow(false);
