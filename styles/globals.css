@@ -27,3 +27,17 @@
 .tabs button:hover{
   transform:translateY(-2px);
 }
+.flashcards{
+  background:#2563eb;
+  color:white;
+}
+
+.quiz{
+  background:#16a34a;
+  color:white;
+}
+
+.profesor{
+  background:#7c2d12;
+  color:white;
+}
