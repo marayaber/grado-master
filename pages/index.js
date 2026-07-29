@@ -165,42 +165,48 @@ function eliminarGuardado(id) {
   }
 
   return (
-    <main className="wrap">
-    
-          <p className="eyebrow">Tu compañero de estudio</p>
+  <main className="wrap">
 
-<h1>
-  {vista === "flashcards"
-    ? "📚 Grado Master | Flashcards"
-    : vista === "quiz"
-    ? "📝 Grado Master | Quiz"
-    : "👨‍🏫 Grado Master | Profesor Exigente"}
-</h1>
+    <section className="hero">
+      <div>
 
-<p className="sub">
-  {vista === "flashcards"
-    ? "Memoriza el contenido de tus apuntes mediante flashcards."
-    : vista === "quiz"
-    ? "Evalúa tus conocimientos con preguntas de alternativa."
-    : "Simula un examen oral de grado con IA."}
-</p>
-        </div>
+        <p className="eyebrow">Tu compañero de estudio</p>
+
+        <h1>
+          {vista === "flashcards"
+            ? "📚 Grado Master | Flashcards"
+            : vista === "quiz"
+            ? "📝 Grado Master | Quiz"
+            : "👨‍🏫 Grado Master | Profesor Exigente"}
+        </h1>
+
+        <p className="sub">
+          {vista === "flashcards"
+            ? "Memoriza el contenido de tus apuntes mediante flashcards."
+            : vista === "quiz"
+            ? "Evalúa tus conocimientos con preguntas de alternativa."
+            : "Simula un examen oral de grado con IA."}
+        </p>
+
+      </div>
+
       <div
-  className={
-    vista === "flashcards"
-      ? "pill flashcards"
-      : vista === "quiz"
-      ? "pill pillQuiz"
-      : "pill profesor"
-  }
->
-  {vista === "flashcards"
-    ? "📚 Flashcards"
-    : vista === "quiz"
-    ? "📝 Quiz"
-    : "👨‍🏫 Profesor Exigente"}
-</div>
-      </section>
+        className={
+          vista === "flashcards"
+            ? "pill flashcards"
+            : vista === "quiz"
+            ? "pill pillQuiz"
+            : "pill profesor"
+        }
+      >
+        {vista === "flashcards"
+          ? "📚 Flashcards"
+          : vista === "quiz"
+          ? "📝 Quiz"
+          : "👨‍🏫 Profesor Exigente"}
+      </div>
+
+    </section>
     <div className="tabs">
   <button
   className={vista === "flashcards" ? "activeTab" : ""}
@@ -328,13 +334,12 @@ function eliminarGuardado(id) {
       onClick={() => cargarGuardado(item)}
     >
       <b>{item.titulo}</b>
-      <span>
-        {vista === "flashcards"
-  ? `${item.flashcards?.length || 0} flashcards`
-  : `${item.recursos?.length || 0} preguntas`
-      </span>
-    </div>
-
+     <span>
+  {vista === "flashcards"
+    ? `${item.flashcards?.length || 0} flashcards`
+    : `${item.recursos?.length || 0} preguntas`}
+</span>
+</div>
     <button
       className="secondary"
       style={{ marginTop: "10px" }}
