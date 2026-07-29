@@ -5,7 +5,21 @@
   font-weight:bold;
   border-radius:10px;
 }
+.tabs{
+  display:flex;
+  gap:12px;
+  margin:24px 0;
+}
 
+.tabs button{
+  padding:14px 24px;
+  border:none;
+  border-radius:14px;
+  background:#ece7e3;
+  cursor:pointer;
+  font-size:15px;
+  font-weight:700;
+}
 .tabs button{
   transition:.2s;
 }
