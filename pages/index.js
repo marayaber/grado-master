@@ -166,30 +166,51 @@ function eliminarGuardado(id) {
 
   return (
     <main className="wrap">
+    
+          <p className="eyebrow">Tu compañero de estudio</p>
+
+<h1>
+  {vista === "flashcards"
+    ? "📚 Grado Master | Flashcards"
+    : vista === "quiz"
+    ? "📝 Grado Master | Quiz"
+    : "👨‍🏫 Grado Master | Profesor Exigente"}
+</h1>
+
+<p className="sub">
+  {vista === "flashcards"
+    ? "Memoriza el contenido de tus apuntes mediante flashcards."
+    : vista === "quiz"
+    ? "Evalúa tus conocimientos con preguntas de alternativa."
+    : "Simula un examen oral de grado con IA."}
+</p>
+        </div>
+        <div className="pill">Derecho Chile</div>
+      </section>
     <div className="tabs">
-  <button onClick={() => setVista("flashcards")}>
+  <button
+  className={vista === "flashcards" ? "activeTab" : ""}
+  onClick={() => setVista("flashcards")}
+>
     📚 Flashcards
   </button>
 
-  <button onClick={() => setVista("quiz")}>
+  <button
+  className={vista === "quiz" ? "activeTab" : ""}
+  onClick={() => setVista("quiz")}
+>
     📝 Quiz
   </button>
 
-  <button onClick={() => setVista("profesor")}>
+  <button
+  className={vista === "profesor" ? "activeTab" : ""}
+  onClick={() => setVista("profesor")}
+>
     👨‍🏫 Profesor Exigente
   </button>
 </div>
       <section className="hero">
         <div>
-          <p className="eyebrow">tu compañero de estudio</p>
-          <h1>Grado Master</h1>
-          <p className="sub">
-            Sube tus documentos de estudio y transforma tus apuntes en recursos
-            para aprender Derecho.
-          </p>
-        </div>
-        <div className="pill">Derecho Chile</div>
-      </section>
 
       <section className="grid">
         <div className="card big">
@@ -245,12 +266,26 @@ function eliminarGuardado(id) {
         </div>
 
         <div className="card">
-          <h2>Biblioteca local</h2>
+          <h2>
+  {vista === "flashcards"
+    ? "📚 Biblioteca de Flashcards"
+    : vista === "quiz"
+    ? "📝 Biblioteca de Quiz"
+    : "👨‍🏫 Biblioteca Profesor Exigente"}
+</h2>
           {saved.length === 0 && (
             <p className="muted">Todavía no hay documentos guardados.</p>
           )}
 
-         {saved.map((item) => (
+         {saved
+  .filter((item) =>
+    vista === "flashcards"
+      ? item.flashcards?.length > 0
+      : vista === "quiz"
+      ? item.recursos?.length > 0
+      : false
+  )
+  .map((item) => (
   <div key={item.id} className="saved">
     <div
       style={{ cursor: "pointer" }}
@@ -258,7 +293,9 @@ function eliminarGuardado(id) {
     >
       <b>{item.titulo}</b>
       <span>
-        {item.materia} · {item.recursos.length} preguntas
+        {vista === "flashcards"
+  ? `${item.flashcards?.length || 0} flashcards`
+  : `${item.recursos?.length || 0} preguntas`
       </span>
     </div>
 
