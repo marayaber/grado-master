@@ -230,9 +230,11 @@ function eliminarGuardado(id) {
   </button>
 </div>
       <section className="hero">
-        <div>
+  <div>
+  </div>
+</section>
 
-      <section className="grid">
+<section className="grid">
         <div className="card big">
          <h2>
   {vista === "flashcards"
