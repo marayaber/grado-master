@@ -185,7 +185,13 @@ function eliminarGuardado(id) {
     : "Simula un examen oral de grado con IA."}
 </p>
         </div>
-        <div className="pill">Derecho Chile</div>
+        <div className="pill">
+  {vista === "flashcards"
+    ? "📚 Flashcards"
+    : vista === "quiz"
+    ? "📝 Quiz"
+    : "👨‍🏫 Profesor Exigente"}
+</div>
       </section>
     <div className="tabs">
   <button
@@ -214,7 +220,13 @@ function eliminarGuardado(id) {
 
       <section className="grid">
         <div className="card big">
-          <h2>1. Cargar documento</h2>
+         <h2>
+  {vista === "flashcards"
+    ? "📚 Generar Flashcards"
+    : vista === "quiz"
+    ? "📝 Generar Quiz"
+    : "👨‍🏫 Generar Simulación Oral"}
+</h2>
 
           <label>Materia</label>
           <select value={materia} onChange={(e) => setMateria(e.target.value)}>
@@ -230,7 +242,13 @@ function eliminarGuardado(id) {
             placeholder="Ej: Contratos - Compraventa"
           />
 
-          <label>Documento</label>
+          <label>
+  {vista === "flashcards"
+    ? "Documento para generar Flashcards"
+    : vista === "quiz"
+    ? "Documento para generar Quiz"
+    : "Documento para simular examen oral"}
+</label>
           <div className="uploadBox">
             <input
               type="file"
@@ -238,10 +256,14 @@ function eliminarGuardado(id) {
               onChange={cargarArchivo}
             />
             <p>
-              {archivo
-                ? `Archivo seleccionado: ${archivo.name}`
-                : "Selecciona PDF, Word o TXT"}
-            </p>
+  {archivo
+    ? `📄 ${archivo.name}`
+    : vista === "flashcards"
+    ? "Sube el documento del que quieres crear flashcards."
+    : vista === "quiz"
+    ? "Sube el documento del que quieres generar un quiz."
+    : "Sube el documento para crear una simulación oral."}
+</p>
           </div>
 
           <details className="manualText" open>
@@ -257,7 +279,13 @@ function eliminarGuardado(id) {
 
           <div className="actions">
             <button className="primary" onClick={generar} disabled={loading}>
-              {loading ? "Analizando..." : "Analizar documento"}
+              {loading
+  ? "Analizando..."
+  : vista === "flashcards"
+  ? "📚 Crear Flashcards"
+  : vista === "quiz"
+  ? "📝 Crear Quiz"
+  : "👨‍🏫 Crear Simulación"}
             </button>
             <button className="secondary" onClick={limpiar} disabled={loading}>
               Limpiar
