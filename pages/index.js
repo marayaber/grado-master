@@ -185,12 +185,12 @@ function eliminarGuardado(id) {
     : "Simula un examen oral de grado con IA."}
 </p>
         </div>
-        <div
+      <div
   className={
     vista === "flashcards"
       ? "pill flashcards"
       : vista === "quiz"
-      ? "pill quiz"
+      ? "pill pillQuiz"
       : "pill profesor"
   }
 >
