@@ -85,7 +85,7 @@ Incluye:
 - Ejemplos del documento.
 
 No dejes contenido importante sin convertir en flashcards.
-Después genera un quiz de 15 preguntas de alternativa.
+Después genera un quiz de 20 preguntas de alternativa.
 
 Cada pregunta debe tener:
 
