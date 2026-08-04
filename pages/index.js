@@ -27,7 +27,8 @@ const [mostrarReverso, setMostrarReverso] = useState(false);
   const [show, setShow] = useState(false);
   const [saved, setSaved] = useState([]);
   const [vista, setVista] = useState("flashcards");
-
+const [examenIniciado, setExamenIniciado] = useState(false);
+const [preguntaActual, setPreguntaActual] = useState(0);
   useEffect(() => {
     setSaved(JSON.parse(localStorage.getItem("gradoMasterRecursos") || "[]"));
   }, []);
@@ -478,6 +479,43 @@ function eliminarGuardado(id) {
           )}
         </section>
       )}
+        {vista === "profesor" && (
+  <section className="card">
+
+    <h2>👨‍🏫 Profesor Exigente</h2>
+
+    {!examenIniciado ? (
+  <>
+    <p>
+      Bienvenido al examen oral.
+    </p>
+
+    <p>
+      Se formularán cinco preguntas sobre el documento.
+      Durante el examen no habrá comentarios ni retroalimentación.
+      La evaluación será entregada únicamente al finalizar.
+    </p>
+
+    <button
+      className="primary"
+      onClick={() => setExamenIniciado(true)}
+    >
+      Comenzar examen
+    </button>
+  </>
+) : (
+  <>
+    <h3>Pregunta {preguntaActual + 1} de 5</h3>
+
+    <h2>{recursos[preguntaActual]?.pregunta}</h2>
+
+    <button className="primary">
+      🎤 Iniciar respuesta
+    </button>
+  </>
+)}
+  </section>
+)}
     </main>
   );
 }
