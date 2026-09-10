@@ -235,93 +235,63 @@ function eliminarGuardado(id) {
   </div>
 </section>
 
- {vista !== "profesor" && (     
-<section className="grid">
-        <div className="card big">
-         <h2>
-  {vista === "flashcards"
-    ? "📚 Generar Flashcards"
-    : vista === "quiz"
-    ? "📝 Generar Quiz"
-    : "👨‍🏫 Generar Simulación Oral"}
-</h2>
+ {vista === "profesor" && (
+  <section className="profesorScreen">
+    <div className="profesorHeader">
+      <p className="eyebrow">Evaluación final</p>
+      <h2>👨‍🏫 Profesor Exigente</h2>
+      <p>
+        Examen oral de grado
+      </p>
+    </div>
 
-          <label>Materia</label>
-          <select value={materia} onChange={(e) => setMateria(e.target.value)}>
-            {materias.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
+    <div className="profesorPanel">
+      <h3>Bienvenido al examen oral</h3>
 
-          <label>Título del documento</label>
-          <input
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            placeholder="Ej: Contratos - Compraventa"
-          />
+      <p>
+        Se realizarán cinco preguntas sobre el documento seleccionado.
+      </p>
 
-          <label>
-  {vista === "flashcards"
-    ? "Documento para generar Flashcards"
-    : vista === "quiz"
-    ? "Documento para generar Quiz"
-    : "Documento para simular examen oral"}
-</label>
-          <div className="uploadBox">
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx,.txt"
-              onChange={cargarArchivo}
-            />
-            <p>
-  {archivo
-    ? `📄 ${archivo.name}`
-    : vista === "flashcards"
-    ? "Sube el documento del que quieres crear flashcards."
-    : vista === "quiz"
-    ? "Sube el documento del que quieres generar un quiz."
-    : "Sube el documento para crear una simulación oral."}
-</p>
-          </div>
+      <p>
+        El profesor no entregará retroalimentación durante el examen.
+        La evaluación será realizada al finalizar las cinco preguntas.
+      </p>
 
-          <details className="manualText" open>
-            <summary>Pegar texto manualmente</summary>
-            <textarea
-              value={apunte}
-              onChange={(e) => setApunte(e.target.value)}
-              placeholder="Pega aquí el contenido del documento si no quieres subir archivo..."
-            />
-          </details>
+      <label>Materia</label>
+      <select value={materia} onChange={(e) => setMateria(e.target.value)}>
+        {materias.map((m) => (
+          <option key={m}>{m}</option>
+        ))}
+      </select>
 
-          {error && <p className="error">{error}</p>}
+      <label>Documento para el examen</label>
 
-          <div className="actions">
-            <button className="primary" onClick={generar} disabled={loading}>
-              {loading
-  ? "Analizando..."
-  : vista === "flashcards"
-  ? "📚 Crear Flashcards"
-  : vista === "quiz"
-  ? "📝 Crear Quiz"
-  : "👨‍🏫 Crear Simulación"}
-            </button>
-            <button className="secondary" onClick={limpiar} disabled={loading}>
-              Limpiar
-            </button>
-          </div>
-        </div>
+      <div className="uploadBox">
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx,.txt"
+          onChange={cargarArchivo}
+        />
 
-        <div className="card">
-          <h2>
-  {vista === "flashcards"
-    ? "📚 Biblioteca de Flashcards"
-    : vista === "quiz"
-    ? "📝 Biblioteca de Quiz"
-    : "👨‍🏫 Biblioteca Profesor Exigente"}
-</h2>
-          {saved.length === 0 && (
-            <p className="muted">Todavía no hay documentos guardados.</p>
-          )}
+        <p>
+          {archivo
+            ? `📄 ${archivo.name}`
+            : "Sube el documento que utilizarás para rendir el examen oral."}
+        </p>
+      </div>
+
+      {error && <p className="error">{error}</p>}
+
+      <button
+        className="primary"
+        onClick={generar}
+        disabled={loading}
+      >
+        {loading ? "Preparando examen..." : "Preparar examen oral"}
+      </button>
+    </div>
+  </section>
+)}
 
          {saved
   .filter((item) =>
