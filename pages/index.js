@@ -325,7 +325,6 @@ function eliminarGuardado(id) {
 ))}
         </div>
       </section>
- )}
 {vista === "flashcards" && flashcards.length > 0 && (
   <section className="card">
 
