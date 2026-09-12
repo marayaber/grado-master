@@ -152,3 +152,193 @@
   font-family:Georgia,serif;
   font-size:16px;
 }
+
+.profesorHero{
+  position:relative;
+  margin:-26px;
+  width:calc(100% + 52px);
+  min-height:640px;
+  border-radius:28px;
+  overflow:hidden;
+  background:#0d0906;
+  color:#f2e9df;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:40px;
+}
+.profesorHeroImg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:70% 25%;
+  z-index:0;
+}
+.profesorHeroOverlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg, rgba(10,7,5,.95) 0%, rgba(10,7,5,.8) 32%, rgba(10,7,5,.25) 62%, rgba(10,7,5,0) 100%);
+  z-index:1;
+}
+.profesorHeroContent{
+  position:relative;
+  z-index:2;
+  max-width:420px;
+}
+.profesorCrown{
+  color:#cda86a;
+  font-size:26px;
+  margin-bottom:6px;
+}
+.profesorHeroTitle{
+  font-family:Georgia,serif;
+  color:#e8d5ab;
+  font-size:40px;
+  line-height:1.08;
+  letter-spacing:.03em;
+  margin:0 0 16px;
+}
+.profesorDivider{
+  width:110px;
+  height:1px;
+  background:linear-gradient(90deg, #cda86a, transparent);
+  margin:16px 0;
+}
+.profesorDivider.small{
+  width:70px;
+  margin:14px 0;
+}
+.profesorHeroLead{
+  font-size:19px;
+  line-height:1.5;
+  margin:0;
+  color:#f5efe4;
+}
+.profesorHeroBody{
+  font-size:17px;
+  line-height:1.6;
+  color:#e2d6c3;
+  margin:0 0 18px;
+}
+.profesorHeroAsk{
+  color:#cda86a;
+  font-weight:700;
+  margin:0 0 16px;
+  font-size:15px;
+}
+.profesorCTA{
+  background:transparent;
+  border:1.5px solid #cda86a;
+  color:#e8d5ab;
+  padding:14px 26px;
+  border-radius:6px;
+  font-weight:700;
+  letter-spacing:.08em;
+  cursor:pointer;
+  font-size:14px;
+  transition:.2s;
+}
+.profesorCTA:hover{
+  background:#cda86a;
+  color:#241b12;
+}
+.profesorFooterRow{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:flex-end;
+  gap:18px;
+}
+.profesorBottomBar{
+  flex:1;
+  border:1px solid rgba(205,168,106,.5);
+  border-radius:16px;
+  padding:18px 22px;
+  display:flex;
+  gap:24px;
+  background:rgba(10,7,5,.55);
+}
+.profesorQuote{
+  display:flex;
+  gap:12px;
+  flex:1.4;
+}
+.profesorQuoteIcon{
+  font-size:18px;
+}
+.profesorQuote b{
+  display:block;
+  color:#cda86a;
+  font-size:11px;
+  letter-spacing:.1em;
+  margin-bottom:4px;
+}
+.profesorQuote p{
+  margin:0;
+  font-size:14px;
+  line-height:1.5;
+  color:#efe6d8;
+  font-style:italic;
+}
+.profesorRules{
+  flex:1;
+  border-left:1px solid rgba(205,168,106,.35);
+  padding-left:20px;
+}
+.profesorRules b{
+  display:block;
+  color:#cda86a;
+  font-size:11px;
+  letter-spacing:.08em;
+  margin-bottom:8px;
+}
+.profesorRules ul{
+  margin:0;
+  padding-left:16px;
+  font-size:13px;
+  line-height:1.6;
+  color:#e2d6c3;
+}
+.profesorBrand{
+  flex-shrink:0;
+  text-align:center;
+  color:#cda86a;
+  font-size:10px;
+  letter-spacing:.14em;
+  font-weight:700;
+  line-height:1.4;
+}
+.profesorBrandCrest{
+  display:block;
+  width:32px;
+  height:32px;
+  line-height:30px;
+  border:1px solid #cda86a;
+  border-radius:50%;
+  margin:0 auto 6px;
+  font-family:Georgia,serif;
+}
+.profesorVideoWrap{
+  margin:-26px;
+  width:calc(100% + 52px);
+  border-radius:28px;
+  overflow:hidden;
+  background:#000;
+  line-height:0;
+}
+.profesorVideo{
+  width:100%;
+  display:block;
+}
+
+@media(max-width:800px){
+  .profesorHero{padding:26px;min-height:560px;}
+  .profesorHeroTitle{font-size:32px;}
+  .profesorFooterRow{flex-direction:column;align-items:stretch;}
+  .profesorBottomBar{flex-direction:column;gap:14px;}
+  .profesorRules{border-left:none;border-top:1px solid rgba(205,168,106,.35);padding-left:0;padding-top:14px;}
+  .profesorBrand{text-align:left;}
+  .profesorBrandCrest{display:inline-block;margin:0 8px 0 0;vertical-align:middle;}
+}
