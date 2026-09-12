@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const materias = [
   "Derecho Civil",
@@ -30,6 +30,15 @@ const [mostrarReverso, setMostrarReverso] = useState(false);
 const [examenIniciado, setExamenIniciado] = useState(false);
 const [preguntaActual, setPreguntaActual] = useState(0);
 const [mostrarTexto, setMostrarTexto] = useState(false);
+const [preguntasOrales, setPreguntasOrales] = useState([]);
+const [respuestasOrales, setRespuestasOrales] = useState([]);
+const [grabando, setGrabando] = useState(false);
+const [transcripcionActual, setTranscripcionActual] = useState("");
+const [vozNoSoportada, setVozNoSoportada] = useState(false);
+const [evaluandoOral, setEvaluandoOral] = useState(false);
+const [informeOral, setInformeOral] = useState(null);
+const recognitionRef = useRef(null);
+const textoFinalRef = useRef("");
   useEffect(() => {
     setSaved(JSON.parse(localStorage.getItem("gradoMasterRecursos") || "[]"));
   }, []);
@@ -95,12 +104,20 @@ if (!res.ok)
 
 const lista = data.recursos || [];
 const cards = data.flashcards || [];
+const oral = data.preguntas_orales || [];
 
 setRecursos(lista);
 setFlashcards(cards);
+setPreguntasOrales(oral);
 
 setFlashIndex(0);
 setMostrarReverso(false);
+
+setExamenIniciado(false);
+setPreguntaActual(0);
+setRespuestasOrales([]);
+setTranscripcionActual("");
+setInformeOral(null);
       setSaved((prev) => [
         {
           id: Date.now(),
@@ -110,6 +127,7 @@ setMostrarReverso(false);
           archivo: archivo?.name || null,
           recursos: lista,
           flashcards: cards,
+          preguntas_orales: oral,
         },
         ...prev,
         
@@ -145,9 +163,15 @@ setMostrarReverso(false);
     setTitulo(item.titulo);
     setRecursos(item.recursos);
     setFlashcards(Array.isArray(item.flashcards) ? item.flashcards : []);
+    setPreguntasOrales(Array.isArray(item.preguntas_orales) ? item.preguntas_orales : []);
     setI(0);
     setSel("");
     setShow(false);
+    setExamenIniciado(false);
+    setPreguntaActual(0);
+    setRespuestasOrales([]);
+    setTranscripcionActual("");
+    setInformeOral(null);
     window.scrollTo(0, 0);
   }
 function eliminarGuardado(id) {
@@ -164,6 +188,114 @@ function eliminarGuardado(id) {
     setI(0);
     setSel("");
     setShow(false);
+    setPreguntasOrales([]);
+    setExamenIniciado(false);
+    setPreguntaActual(0);
+    setRespuestasOrales([]);
+    setTranscripcionActual("");
+    setInformeOral(null);
+  }
+
+  function iniciarGrabacion() {
+    const SpeechRecognition =
+      typeof window !== "undefined" &&
+      (window.SpeechRecognition || window.webkitSpeechRecognition);
+
+    if (!SpeechRecognition) {
+      setVozNoSoportada(true);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "es-CL";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    textoFinalRef.current = "";
+    setTranscripcionActual("");
+
+    recognition.onresult = (event) => {
+      let interim = "";
+      for (let idx = event.resultIndex; idx < event.results.length; idx++) {
+        const transcript = event.results[idx][0].transcript;
+        if (event.results[idx].isFinal) {
+          textoFinalRef.current += transcript + " ";
+        } else {
+          interim += transcript;
+        }
+      }
+      setTranscripcionActual((textoFinalRef.current + interim).trim());
+    };
+
+    recognition.onerror = () => {
+      setGrabando(false);
+    };
+
+    recognition.onend = () => {
+      setGrabando(false);
+    };
+
+    recognitionRef.current = recognition;
+    setGrabando(true);
+    recognition.start();
+  }
+
+  function detenerYContinuar() {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setGrabando(false);
+
+    const respuesta = transcripcionActual.trim();
+    const nuevasRespuestas = [...respuestasOrales];
+    nuevasRespuestas[preguntaActual] = respuesta;
+    setRespuestasOrales(nuevasRespuestas);
+    setTranscripcionActual("");
+
+    if (preguntaActual + 1 >= preguntasOrales.length) {
+      evaluarExamenOral(nuevasRespuestas);
+    } else {
+      setPreguntaActual((p) => p + 1);
+    }
+  }
+
+  async function evaluarExamenOral(respuestasCompletas) {
+    setEvaluandoOral(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/evaluar-oral", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          materia,
+          titulo,
+          preguntas: preguntasOrales,
+          respuestas: respuestasCompletas,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "No se pudo evaluar el examen oral.");
+      }
+
+      setInformeOral(data);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setEvaluandoOral(false);
+    }
+  }
+
+  function repetirExamenOral() {
+    setExamenIniciado(false);
+    setPreguntaActual(0);
+    setRespuestasOrales([]);
+    setTranscripcionActual("");
+    setInformeOral(null);
+    setGrabando(false);
   }
 
   return (
@@ -534,36 +666,90 @@ function eliminarGuardado(id) {
 
     <h2>👨‍🏫 Profesor Exigente</h2>
 
-    {!examenIniciado ? (
-  <>
-    <p>
-      Bienvenido al examen oral.
-    </p>
+    {preguntasOrales.length === 0 ? (
+      <p className="muted">
+        Sube un documento arriba y genera la simulación para comenzar el examen oral.
+      </p>
+    ) : informeOral ? (
+      <div className="informeOral">
+        <p className="nota">{Number(informeOral.nota).toFixed(1)}</p>
+        <p>{informeOral.comentario_general}</p>
 
-    <p>
-      Se formularán cinco preguntas sobre el documento.
-      Durante el examen no habrá comentarios ni retroalimentación.
-      La evaluación será entregada únicamente al finalizar.
-    </p>
+        {(informeOral.detalle || []).map((d, idx) => (
+          <div key={idx} className="detalleOral">
+            <h3>Pregunta {idx + 1}</h3>
+            <p><b>{d.pregunta}</b></p>
+            <p className="hint">Tu respuesta: {d.respuesta_alumno}</p>
+            <p>{d.evaluacion}</p>
+          </div>
+        ))}
 
-    <button
-      className="primary"
-      onClick={() => setExamenIniciado(true)}
-    >
-      Comenzar examen
-    </button>
-  </>
-) : (
-  <>
-    <h3>Pregunta {preguntaActual + 1} de 5</h3>
+        <button className="primary" onClick={repetirExamenOral}>
+          Repetir examen oral
+        </button>
+      </div>
+    ) : !examenIniciado ? (
+      <>
+        <p>
+          Bienvenido al examen oral.
+        </p>
 
-    <h2>{recursos[preguntaActual]?.pregunta}</h2>
+        <p>
+          Se formularán cinco preguntas sobre el documento.
+          Durante el examen no habrá comentarios ni retroalimentación.
+          La evaluación será entregada únicamente al finalizar.
+        </p>
 
-    <button className="primary">
-      🎤 Iniciar respuesta
-    </button>
-  </>
-)}
+        <button
+          className="primary"
+          onClick={() => setExamenIniciado(true)}
+        >
+          Comenzar examen
+        </button>
+      </>
+    ) : evaluandoOral ? (
+      <p>Evaluando tu examen oral...</p>
+    ) : (
+      <>
+        <h3>Pregunta {preguntaActual + 1} de 5</h3>
+
+        <h2>{preguntasOrales[preguntaActual]?.pregunta}</h2>
+
+        {vozNoSoportada ? (
+          <>
+            <p className="hint">
+              Tu navegador no soporta reconocimiento de voz. Escribe tu respuesta manualmente.
+            </p>
+            <textarea
+              value={transcripcionActual}
+              onChange={(e) => setTranscripcionActual(e.target.value)}
+              placeholder="Escribe aquí tu respuesta..."
+            />
+            <button className="primary" onClick={detenerYContinuar}>
+              Registrar respuesta y continuar
+            </button>
+          </>
+        ) : (
+          <>
+            {grabando && <p className="hint">🔴 Grabando... habla tu respuesta.</p>}
+
+            {transcripcionActual && (
+              <p className="hint">{transcripcionActual}</p>
+            )}
+
+            {!grabando ? (
+              <button className="primary" onClick={iniciarGrabacion}>
+                🎤 Iniciar respuesta
+              </button>
+            ) : (
+              <button className="primary" onClick={detenerYContinuar}>
+                ⏹ Terminar respuesta y continuar
+              </button>
+            )}
+          </>
+        )}
+      </>
+    )}
   </section>
 )}
     </main>
