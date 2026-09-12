@@ -298,14 +298,29 @@ function eliminarGuardado(id) {
       : false
   )
   .map((item) => (
-  <div key={item.id} className="saved">
-    <div
-      style={{ cursor: "pointer" }}
-      onClick={() => cargarGuardado(item)}
-    >
-      <b>{item.titulo}</b>
-     <span>
-  {vista === "flashcards"
+    <div key={item.id} className="saved">
+      <div
+        style={{ cursor: "pointer" }}
+        onClick={() => cargarGuardado(item)}
+      >
+        <b>{item.titulo}</b>
+
+        <span>
+          {vista === "flashcards"
+            ? `${item.flashcards?.length || 0} flashcards`
+            : `${item.recursos?.length || 0} preguntas`}
+        </span>
+      </div>
+
+      <button
+        className="secondary"
+        style={{ marginTop: "10px" }}
+        onClick={() => eliminarGuardado(item.id)}
+      >
+        🗑 Eliminar
+      </button>
+    </div>
+  ))}
     ? `${item.flashcards?.length || 0} flashcards`
     : `${item.recursos?.length || 0} preguntas`}
 </span>
