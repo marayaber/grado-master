@@ -321,20 +321,7 @@ function eliminarGuardado(id) {
       </button>
     </div>
   ))}
-    ? `${item.flashcards?.length || 0} flashcards`
-    : `${item.recursos?.length || 0} preguntas`}
-</span>
-</div>
-    <button
-      className="secondary"
-      style={{ marginTop: "10px" }}
-      onClick={() => eliminarGuardado(item.id)}
-    >
-      🗑 Eliminar
-    </button>
-  </div>
-))}
-{vista === "flashcards" && flashcards.length > 0 && (
+  {vista === "flashcards" && flashcards.length > 0 && (
   <section className="card">
 
     <h2>Flashcard {flashIndex + 1} de {flashcards.length}</h2>
