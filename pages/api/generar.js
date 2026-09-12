@@ -34,7 +34,11 @@ export default async function handler(req, res) {
     const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
 
     if (!apiKey) {
-      return res.status(200).json({ recursos: demo(apunte) });
+      return res.status(200).json({
+        recursos: demo(apunte),
+        flashcards: [],
+        preguntas_orales: demoOral(apunte),
+      });
     }
 
     const { GoogleGenerativeAI } = await import("@google/generative-ai");
@@ -94,6 +98,14 @@ Cada pregunta debe tener:
 - Explicación del porqué.
 - Cita textual del documento.
 
+Finalmente, genera EXACTAMENTE 5 preguntas abiertas para un examen ORAL de grado,
+distintas de las preguntas de alternativa. Deben ser preguntas amplias que un
+profesor exigente haría en voz alta (ej: "Explique el concepto de...",
+"¿Cuáles son los requisitos de...", "Diferencie entre..."). Para cada una,
+incluye una "respuesta_esperada" con los puntos clave que un alumno debería
+mencionar (esto NO se muestra al alumno, es solo para evaluar después), y una
+cita textual del documento que la respalde.
+
 Devuelve únicamente JSON válido.
 
 Formato:
@@ -119,6 +131,13 @@ Formato:
       "explicacion":"",
       "cita_textual":""
     }
+  ],
+  "preguntas_orales":[
+    {
+      "pregunta":"",
+      "respuesta_esperada":"",
+      "cita_textual":""
+    }
   ]
 }
 
@@ -141,13 +160,18 @@ const recursos = (data.recursos || []).filter(
   (r) => r.pregunta && r.opciones && r.respuesta_correcta
 );
 
-if (!flashcards.length && !recursos.length) {
+const preguntas_orales = (data.preguntas_orales || [])
+  .filter((p) => p.pregunta)
+  .slice(0, 5);
+
+if (!flashcards.length && !recursos.length && !preguntas_orales.length) {
   throw new Error("Gemini no devolvió contenido válido.");
 }
 
 return res.status(200).json({
   flashcards,
   recursos,
+  preguntas_orales,
 });
   } catch (e) {
     return res.status(500).json({
@@ -213,6 +237,19 @@ function demo(apunte) {
     respuesta_correcta: "a",
     explicacion:
       "La alternativa correcta reproduce una idea contenida directamente en el apunte.",
+    cita_textual: f.trim(),
+  }));
+}
+
+function demoOral(apunte) {
+  const clean = apunte.replace(/\s+/g, " ").trim();
+  const frases = clean.match(/[^.!?]+[.!?]+/g)?.slice(0, 5) || [
+    clean.slice(0, 250),
+  ];
+
+  return frases.slice(0, 5).map((f, i) => ({
+    pregunta: `Explique con sus palabras la idea contenida en el fragmento ${i + 1} del documento.`,
+    respuesta_esperada: f.trim(),
     cita_textual: f.trim(),
   }));
 }
