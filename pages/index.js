@@ -29,6 +29,7 @@ const [mostrarReverso, setMostrarReverso] = useState(false);
   const [vista, setVista] = useState("flashcards");
 const [examenIniciado, setExamenIniciado] = useState(false);
 const [preguntaActual, setPreguntaActual] = useState(0);
+const [mostrarTexto, setMostrarTexto] = useState(false);
   useEffect(() => {
     setSaved(JSON.parse(localStorage.getItem("gradoMasterRecursos") || "[]"));
   }, []);
@@ -289,38 +290,120 @@ function eliminarGuardado(id) {
   </section>
 )}
 
-         {saved
-  .filter((item) =>
-    vista === "flashcards"
-      ? item.flashcards?.length > 0
-      : vista === "quiz"
-      ? item.recursos?.length > 0
-      : false
-  )
-  .map((item) => (
-    <div key={item.id} className="saved">
-      <div
-        style={{ cursor: "pointer" }}
-        onClick={() => cargarGuardado(item)}
-      >
-        <b>{item.titulo}</b>
+         {(vista === "flashcards" || vista === "quiz") && (
+  <div className="grid">
+    <div className="card">
+      <h3>
+        {vista === "flashcards" ? "📚 Generar Flashcards" : "📝 Generar Quiz"}
+      </h3>
 
-        <span>
-          {vista === "flashcards"
-            ? `${item.flashcards?.length || 0} flashcards`
-            : `${item.recursos?.length || 0} preguntas`}
-        </span>
+      <label>Materia</label>
+      <select value={materia} onChange={(e) => setMateria(e.target.value)}>
+        {materias.map((m) => (
+          <option key={m}>{m}</option>
+        ))}
+      </select>
+
+      <label>Título del documento</label>
+      <input
+        type="text"
+        placeholder="Ej: Contrato - Compraventa"
+        value={titulo}
+        onChange={(e) => setTitulo(e.target.value)}
+      />
+
+      <label>
+        {vista === "flashcards"
+          ? "Documento para generar flashcards"
+          : "Documento para generar el quiz"}
+      </label>
+
+      <div className="uploadBox">
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx,.txt"
+          onChange={cargarArchivo}
+        />
+        <p>{archivo ? `📄 ${archivo.name}` : "Ningún archivo seleccionado"}</p>
       </div>
 
       <button
-        className="secondary"
-        style={{ marginTop: "10px" }}
-        onClick={() => eliminarGuardado(item.id)}
+        type="button"
+        className="linkToggle"
+        onClick={() => setMostrarTexto(!mostrarTexto)}
       >
-        🗑 Eliminar
+        {mostrarTexto ? "▲" : "▼"} Pegar texto manualmente
       </button>
+
+      {mostrarTexto && (
+        <textarea
+          placeholder="Pega aquí el contenido del documento si no quieres subir archivo..."
+          value={apunte}
+          onChange={(e) => setApunte(e.target.value)}
+        />
+      )}
+
+      {error && <p className="error">{error}</p>}
+
+      <div className="actions">
+        <button className="primary" onClick={generar} disabled={loading}>
+          {loading
+            ? "Creando..."
+            : vista === "flashcards"
+            ? "🃏 Crear Flashcards"
+            : "📝 Crear Quiz"}
+        </button>
+        <button className="secondary" onClick={limpiar}>
+          Limpiar
+        </button>
+      </div>
     </div>
-  ))}
+
+    <div className="card libraryCard">
+      <h3>
+        {vista === "flashcards" ? "📚 Biblioteca Flashcards" : "📝 Biblioteca Quiz"}
+      </h3>
+
+      {saved.filter((item) =>
+        vista === "flashcards"
+          ? item.flashcards?.length > 0
+          : item.recursos?.length > 0
+      ).length === 0 ? (
+        <p className="muted">Aún no tienes nada guardado aquí.</p>
+      ) : (
+        saved
+          .filter((item) =>
+            vista === "flashcards"
+              ? item.flashcards?.length > 0
+              : item.recursos?.length > 0
+          )
+          .map((item) => (
+            <div key={item.id} className="saved">
+              <div
+                style={{ cursor: "pointer" }}
+                onClick={() => cargarGuardado(item)}
+              >
+                <b>{item.titulo}</b>
+                <span>
+                  {vista === "flashcards"
+                    ? `${item.flashcards?.length || 0} flashcards`
+                    : `${item.recursos?.length || 0} preguntas`}
+                </span>
+              </div>
+
+              <button
+                className="secondary"
+                style={{ marginTop: "10px" }}
+                onClick={() => eliminarGuardado(item.id)}
+              >
+                🗑 Eliminar
+              </button>
+            </div>
+          ))
+      )}
+    </div>
+  </div>
+)}
   {vista === "flashcards" && flashcards.length > 0 && (
   <section className="card">
 
