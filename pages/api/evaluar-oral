@@ -1,0 +1,134 @@
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Método no permitido" });
+  }
+
+  try {
+    const { materia, titulo, preguntas, respuestas } = req.body || {};
+
+    if (!Array.isArray(preguntas) || preguntas.length === 0) {
+      return res.status(400).json({
+        error: "Faltan las preguntas del examen oral para evaluar.",
+      });
+    }
+
+    const respuestasArr = Array.isArray(respuestas) ? respuestas : [];
+
+    const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(200).json(demoInforme(preguntas, respuestasArr));
+    }
+
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2,
+      },
+    });
+
+    const bloques = preguntas
+      .map((p, i) => {
+        const respuesta = respuestasArr[i] || "(El alumno no respondió esta pregunta)";
+        return `
+Pregunta ${i + 1}: ${p.pregunta}
+Puntos clave que debía cubrir la respuesta: ${p.respuesta_esperada || "No especificado"}
+Respuesta oral del alumno (transcrita por voz, puede tener errores menores de transcripción): ${respuesta}
+`;
+      })
+      .join("\n");
+
+    const prompt = `
+Eres un profesor universitario de Derecho en Chile, muy exigente, evaluando un
+examen ORAL de grado.
+
+Se te entregan 5 preguntas que ya fueron formuladas al alumno de forma oral,
+junto con los puntos clave esperados en cada respuesta y la transcripción de
+lo que el alumno respondió en voz alta.
+
+Evalúa cada respuesta comparándola contra los puntos clave esperados. Sé
+riguroso: no otorgues crédito por respuestas vagas, incompletas, evasivas o
+que no correspondan a la pregunta. La respuesta fue transcrita por
+reconocimiento de voz, así que ignora errores de ortografía o palabras mal
+transcritas y concéntrate en el contenido jurídico de fondo.
+
+Materia: ${materia || "Derecho"}
+Documento base: ${titulo || "Documento sin título"}
+
+${bloques}
+
+Devuelve ÚNICAMENTE JSON válido, sin texto adicional, con este formato exacto:
+
+{
+  "nota": 0,
+  "comentario_general": "",
+  "detalle": [
+    {
+      "pregunta": "",
+      "respuesta_alumno": "",
+      "evaluacion": ""
+    }
+  ]
+}
+
+Reglas para "nota": debe ser un número en la escala de notas chilena, entre
+1.0 y 7.0, con un decimal, que refleje el desempeño general de las 5
+respuestas en conjunto (7.0 = dominio excelente de todos los puntos clave,
+4.0 = desempeño mínimo aceptable, 1.0 = examen prácticamente en blanco o sin
+relación con lo preguntado).
+
+"comentario_general" debe ser un párrafo breve (3-4 frases) con la
+evaluación global del examen oral, en tono de profesor exigente pero
+profesional.
+
+"detalle" debe tener exactamente un elemento por cada pregunta, en el mismo
+orden, con "respuesta_alumno" siendo un resumen breve de lo que dijo el
+alumno y "evaluacion" un comentario específico de qué tan completa o
+correcta fue esa respuesta puntual.
+`;
+
+    const result = await model.generateContent(prompt);
+    const data = JSON.parse(result.response.text());
+
+    const nota = Number(data.nota);
+
+    return res.status(200).json({
+      nota: Number.isFinite(nota) ? Math.min(7, Math.max(1, nota)) : 4.0,
+      comentario_general: data.comentario_general || "",
+      detalle: Array.isArray(data.detalle) ? data.detalle : [],
+    });
+  } catch (e) {
+    return res.status(500).json({
+      error: e.message || "Error evaluando el examen oral.",
+    });
+  }
+}
+
+function demoInforme(preguntas, respuestas) {
+  const detalle = preguntas.map((p, i) => {
+    const respuesta = respuestas[i] || "";
+    const suficiente = respuesta.trim().length > 40;
+
+    return {
+      pregunta: p.pregunta,
+      respuesta_alumno: respuesta || "(sin respuesta)",
+      evaluacion: suficiente
+        ? "Respuesta registrada correctamente. (Modo demo: sin evaluación real de IA, falta configurar GOOGLE_GEMINI_API_KEY)."
+        : "Respuesta muy breve o vacía. (Modo demo: sin evaluación real de IA, falta configurar GOOGLE_GEMINI_API_KEY).",
+    };
+  });
+
+  const respondidas = respuestas.filter((r) => (r || "").trim().length > 40).length;
+  const nota = Number((1 + (respondidas / Math.max(preguntas.length, 1)) * 6).toFixed(1));
+
+  return {
+    nota,
+    comentario_general:
+      "Este es un informe de demostración porque no hay una clave de API de Gemini configurada en el servidor.",
+    detalle,
+  };
+}
