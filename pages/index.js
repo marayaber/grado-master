@@ -230,11 +230,7 @@ function eliminarGuardado(id) {
     👨‍🏫 Profesor Exigente
   </button>
 </div>
-      <section className="hero">
-  <div>
-  </div>
-</section>
-
+      
  {vista === "profesor" && (
   <section className="profesorScreen">
     <div className="profesorHeader">
