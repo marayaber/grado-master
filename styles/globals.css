@@ -133,3 +133,22 @@
   font-family:Georgia,serif;
   margin-top:0;
 }
+.informeOral{
+  text-align:left;
+}
+.informeOral > .nota{
+  display:block;
+  text-align:center;
+  margin:0 auto 16px;
+}
+.detalleOral{
+  background:#faf2f3;
+  border-radius:16px;
+  padding:16px;
+  margin:14px 0;
+}
+.detalleOral h3{
+  margin:0 0 6px;
+  font-family:Georgia,serif;
+  font-size:16px;
+}
