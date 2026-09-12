@@ -37,6 +37,7 @@ const [transcripcionActual, setTranscripcionActual] = useState("");
 const [vozNoSoportada, setVozNoSoportada] = useState(false);
 const [evaluandoOral, setEvaluandoOral] = useState(false);
 const [informeOral, setInformeOral] = useState(null);
+const [mostrarVideoIntro, setMostrarVideoIntro] = useState(false);
 const recognitionRef = useRef(null);
 const textoFinalRef = useRef("");
   useEffect(() => {
@@ -194,6 +195,7 @@ function eliminarGuardado(id) {
     setRespuestasOrales([]);
     setTranscripcionActual("");
     setInformeOral(null);
+    setMostrarVideoIntro(false);
   }
 
   function iniciarGrabacion() {
@@ -296,6 +298,7 @@ function eliminarGuardado(id) {
     setTranscripcionActual("");
     setInformeOral(null);
     setGrabando(false);
+    setMostrarVideoIntro(false);
   }
 
   return (
@@ -664,14 +667,16 @@ function eliminarGuardado(id) {
         {vista === "profesor" && (
   <section className="card">
 
-    <h2>👨‍🏫 Profesor Exigente</h2>
-
     {preguntasOrales.length === 0 ? (
-      <p className="muted">
-        Sube un documento arriba y genera la simulación para comenzar el examen oral.
-      </p>
+      <>
+        <h2>👨‍🏫 Profesor Exigente</h2>
+        <p className="muted">
+          Sube un documento arriba y genera la simulación para comenzar el examen oral.
+        </p>
+      </>
     ) : informeOral ? (
       <div className="informeOral">
+        <h2>👨‍🏫 Profesor Exigente</h2>
         <p className="nota">{Number(informeOral.nota).toFixed(1)}</p>
         <p>{informeOral.comentario_general}</p>
 
@@ -688,25 +693,93 @@ function eliminarGuardado(id) {
           Repetir examen oral
         </button>
       </div>
+    ) : mostrarVideoIntro ? (
+      <div className="profesorVideoWrap">
+        <video
+          className="profesorVideo"
+          src="/profesor-exigente.mp4"
+          autoPlay
+          playsInline
+          onEnded={() => {
+            setMostrarVideoIntro(false);
+            setExamenIniciado(true);
+          }}
+        />
+      </div>
     ) : !examenIniciado ? (
-      <>
-        <p>
-          Bienvenido al examen oral.
-        </p>
+      <div className="profesorHero">
+        <img
+          src="/profesor-exigente.png"
+          alt="Profesor Exigente"
+          className="profesorHeroImg"
+        />
+        <div className="profesorHeroOverlay" />
 
-        <p>
-          Se formularán cinco preguntas sobre el documento.
-          Durante el examen no habrá comentarios ni retroalimentación.
-          La evaluación será entregada únicamente al finalizar.
-        </p>
+        <div className="profesorHeroContent">
+          <div className="profesorCrown">♛</div>
+          <h2 className="profesorHeroTitle">
+            PROFESOR
+            <br />
+            EXIGENTE
+          </h2>
+          <div className="profesorDivider" />
 
-        <button
-          className="primary"
-          onClick={() => setExamenIniciado(true)}
-        >
-          Comenzar examen
-        </button>
-      </>
+          <p className="profesorHeroLead">
+            Aquí no hay lugar para respuestas improvisadas.
+          </p>
+
+          <div className="profesorDivider small" />
+
+          <p className="profesorHeroBody">
+            Piense. Fundamente.
+            <br />
+            Demuestre que merece aprobar.
+          </p>
+
+          <p className="profesorHeroAsk">¿Listo para comenzar?</p>
+
+          <button
+            className="profesorCTA"
+            onClick={() => setMostrarVideoIntro(true)}
+          >
+            SÍ, PROFESOR
+          </button>
+        </div>
+
+        <div className="profesorFooterRow">
+          <div className="profesorBottomBar">
+            <div className="profesorQuote">
+              <span className="profesorQuoteIcon">🔊</span>
+              <div>
+                <b>PROFESOR EXIGENTE</b>
+                <p>
+                  "Hoy evaluaremos su conocimiento. Responda con claridad,
+                  precisión y fundamento jurídico."
+                </p>
+              </div>
+            </div>
+
+            <div className="profesorRules">
+              <b>REGLAS DEL JUEGO</b>
+              <ul>
+                <li>No acepto respuestas vagas.</li>
+                <li>Fundamente cada afirmación.</li>
+                <li>Si no sabe, dígalo.</li>
+                <li>El error no se castiga, la ignorancia sí.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="profesorBrand">
+            <span className="profesorBrandCrest">G</span>
+            <span>
+              GRADO
+              <br />
+              MASTER
+            </span>
+          </div>
+        </div>
+      </div>
     ) : evaluandoOral ? (
       <p>Evaluando tu examen oral...</p>
     ) : (
