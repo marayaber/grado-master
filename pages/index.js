@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const materias = [
   "Derecho Civil",
@@ -12,6 +13,7 @@ const materias = [
 ];
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const [materia, setMateria] = useState("Derecho Civil");
   const [titulo, setTitulo] = useState("");
   const [apunte, setApunte] = useState("");
@@ -41,12 +43,13 @@ const [mostrarVideoIntro, setMostrarVideoIntro] = useState(false);
 const recognitionRef = useRef(null);
 const textoFinalRef = useRef("");
   useEffect(() => {
-    setSaved(JSON.parse(localStorage.getItem("gradoMasterRecursos") || "[]"));
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("gradoMasterRecursos", JSON.stringify(saved));
-  }, [saved]);
+    if (status === "authenticated") {
+      fetch("/api/documentos")
+        .then((res) => res.json())
+        .then((data) => setSaved(data.documentos || []))
+        .catch(() => setSaved([]));
+    }
+  }, [status]);
 
   const current = recursos[i];
   const score = useMemo(() => recursos.filter((r) => r._ok).length, [recursos]);
@@ -119,20 +122,30 @@ setPreguntaActual(0);
 setRespuestasOrales([]);
 setTranscripcionActual("");
 setInformeOral(null);
-      setSaved((prev) => [
-        {
-          id: Date.now(),
-          materia,
-          titulo: titulo || archivo?.name || "Documento sin título",
-          fecha: new Date().toLocaleString(),
-          archivo: archivo?.name || null,
-          recursos: lista,
-          flashcards: cards,
-          preguntas_orales: oral,
-        },
-        ...prev,
-        
-      ]);
+
+try {
+  const resGuardar = await fetch("/api/documentos", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      materia,
+      titulo: titulo || archivo?.name || "Documento sin título",
+      archivo: archivo?.name || null,
+      recursos: lista,
+      flashcards: cards,
+      preguntas_orales: oral,
+    }),
+  });
+
+  const nuevo = await resGuardar.json();
+
+  if (resGuardar.ok) {
+    setSaved((prev) => [nuevo, ...prev]);
+  }
+} catch (e) {
+  // Si falla el guardado en la nube, el usuario igual puede usar
+  // los recursos recién generados en esta sesión.
+}
     } catch (e) {
       setError(e.message);
     } finally {
@@ -175,8 +188,14 @@ setInformeOral(null);
     setInformeOral(null);
     window.scrollTo(0, 0);
   }
-function eliminarGuardado(id) {
+async function eliminarGuardado(id) {
   if (!window.confirm("¿Eliminar este documento de la biblioteca?")) return;
+
+  try {
+    await fetch(`/api/documentos?id=${id}`, { method: "DELETE" });
+  } catch (e) {
+    // seguimos igual quitándolo de la vista aunque falle la red
+  }
 
   setSaved((prev) => prev.filter((item) => item.id !== id));
 }
@@ -301,8 +320,44 @@ function eliminarGuardado(id) {
     setMostrarVideoIntro(false);
   }
 
+  if (status === "loading") {
+    return (
+      <main className="wrap">
+        <p className="muted">Cargando...</p>
+      </main>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <main className="wrap">
+        <div className="loginScreen">
+          <h1>📚 Grado Master</h1>
+          <p>
+            Inicia sesión con tu cuenta de Google para guardar tu biblioteca
+            de flashcards, quiz y exámenes orales, y verla desde cualquier
+            dispositivo.
+          </p>
+          <button className="primary" onClick={() => signIn("google")}>
+            Iniciar sesión con Google
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   return (
   <main className="wrap">
+
+    {session && (
+      <div className="userBar">
+        {session.user?.image && (
+          <img src={session.user.image} alt={session.user.name || "Usuario"} />
+        )}
+        <span>{session.user?.name}</span>
+        <button onClick={() => signOut()}>Cerrar sesión</button>
+      </div>
+    )}
 
     <section className="hero">
       <div>
